@@ -1,0 +1,219 @@
+{
+  "enable": {
+    "description": "启用群管",
+    "type": "bool",
+    "default": true
+  },
+  "app_id": {
+    "description": "机器人 AppID",
+    "type": "string",
+    "default": "",
+    "hint": "QQ 开放平台 → 开发设置 → AppID"
+  },
+  "app_secret": {
+    "description": "机器人 AppSecret",
+    "type": "string",
+    "default": "",
+    "secret": true,
+    "hint": "只用于插件自行换取 access_token，不会发给第三方"
+  },
+  "admin_openids": {
+    "description": "允许执行群管命令的 openid 列表",
+    "type": "list",
+    "default": [],
+    "hint": "强烈建议配置。成员可以在群里发「我的id」拿到自己的 openid；留空表示不限制（任何人都能触发）"
+  },
+  "cache_messages": {
+    "description": "缓存最近群消息（用于撤回）",
+    "type": "bool",
+    "default": true,
+    "hint": "官方只允许撤回 2 分钟内的消息，需要缓存才能定位到目标；关闭后「撤回」会不可用"
+  },
+  "cache_size": {
+    "description": "每个群缓存多少条消息",
+    "type": "int",
+    "default": 30
+  },
+  "cache_ttl": {
+    "description": "缓存保留时长（秒）",
+    "type": "int",
+    "default": 600
+  },
+  "timeout": {
+    "description": "接口超时（秒）",
+    "type": "int",
+    "default": 10
+  },
+  "verify_ssl": {
+    "description": "校验 HTTPS 证书",
+    "type": "bool",
+    "default": true,
+    "hint": "代理环境下如果一直报证书错误，可以关掉"
+  },
+  "moderation_enabled": {
+    "description": "开启 AI 智能审核",
+    "type": "bool",
+    "default": false,
+    "hint": "命中规则词或模型判定违规后，按下面的处置方式处理；管理员和白名单不受影响"
+  },
+  "moderation_action": {
+    "description": "违规处置方式",
+    "type": "string",
+    "options": [
+      "recall",
+      "mute",
+      "warn"
+    ],
+    "default": "recall"
+  },
+  "moderation_mute_seconds": {
+    "description": "审核禁言时长（秒）",
+    "type": "int",
+    "default": 600,
+    "hint": "仅处置方式为 mute 时生效，最大 30 天"
+  },
+  "moderation_keywords": {
+    "description": "规则词（命中即处置）",
+    "type": "list",
+    "default": []
+  },
+  "auto_seed_rules": {
+    "description": "首次安装自动导入预置规则",
+    "type": "bool",
+    "default": true,
+    "hint": "规则词为空时，自动装一套广告/诈骗/辱骂/低俗的常用词；不想用可以在管理页清空"
+  },
+  "lexicon_categories": {
+    "description": "启用的内置词库分类",
+    "type": "list",
+    "default": [
+      "ad",
+      "porn",
+      "violent_terror",
+      "weapons",
+      "tencent_ban",
+      "other",
+      "supplement"
+    ],
+    "hint": "内置词库共 4.5 万条。默认开误杀率低的 6 类；政治、违规网址、民生等建议按需开启"
+  },
+  "moderation_whitelist": {
+    "description": "审核白名单 openid",
+    "type": "list",
+    "default": [],
+    "hint": "这些人的消息不会被审核"
+  },
+  "moderation_use_llm": {
+    "description": "用模型判断规则词以外的内容",
+    "type": "bool",
+    "default": true,
+    "hint": "关闭后只靠规则词匹配，零误判但也只能拦关键词"
+  },
+  "moderation_prompt": {
+    "description": "审核提示词",
+    "type": "text",
+    "default": "",
+    "hint": "留空用内置提示词；用 {text} 代表消息内容"
+  },
+  "llm_provider_id": {
+    "description": "审核用的模型",
+    "type": "string",
+    "default": "",
+    "_special": "select_provider",
+    "hint": "留空使用会话默认模型"
+  },
+  "spam_enabled": {
+    "description": "开启刷屏检测",
+    "type": "bool",
+    "default": false,
+    "hint": "超过阈值直接按审核处置方式处理"
+  },
+  "spam_limit": {
+    "description": "窗口内消息条数上限",
+    "type": "int",
+    "default": 10
+  },
+  "spam_window": {
+    "description": "刷屏统计窗口（秒）",
+    "type": "int",
+    "default": 60
+  },
+  "platform_ids": {
+    "description": "生效的机器人实例",
+    "type": "list",
+    "default": [],
+    "hint": "填平台实例 ID（管理页 → 设置 → 生效平台 可勾选）；留空表示所有 QQ 官方实例都生效"
+  },
+  "mute_enabled": {
+    "description": "启用禁言/解禁",
+    "type": "bool",
+    "default": true
+  },
+  "kick_enabled": {
+    "description": "启用踢人",
+    "type": "bool",
+    "default": true
+  },
+  "recall_enabled": {
+    "description": "启用撤回",
+    "type": "bool",
+    "default": true
+  },
+  "whole_ban_enabled": {
+    "description": "启用全员禁言",
+    "type": "bool",
+    "default": true
+  },
+  "member_query_enabled": {
+    "description": "启用群信息/成员查询",
+    "type": "bool",
+    "default": true
+  },
+  "join_request_enabled": {
+    "description": "启用入群申请查询",
+    "type": "bool",
+    "default": true
+  },
+  "moderation_admin_exempt": {
+    "description": "管理员消息豁免审核",
+    "type": "bool",
+    "default": true
+  },
+  "moderation_notify": {
+    "description": "处置后在群里提示",
+    "type": "bool",
+    "default": true
+  },
+  "moderation_fail_open": {
+    "description": "模型失败时放行",
+    "type": "bool",
+    "default": true
+  },
+  "group_whitelist": {
+    "description": "不审核的群 openid",
+    "type": "list",
+    "default": []
+  },
+  "max_records": {
+    "description": "违规记录上限",
+    "type": "int",
+    "default": 500
+  },
+  "command_rate_limit": {
+    "description": "命令冷却（秒）",
+    "type": "int",
+    "default": 0
+  },
+  "auto_unmute": {
+    "description": "禁言到期自动解禁",
+    "type": "bool",
+    "default": true,
+    "hint": "插件记录禁言到期时间，到点自动调用解禁接口；重启后计划不丢"
+  },
+  "group_admins": {
+    "description": "群管理员（按群）",
+    "type": "text",
+    "default": "{}",
+    "hint": "JSON：{\"群 openid\": [\"成员 openid\", ...]}。这里的人只在自己群里能执行管理命令；全局管理员名单对所有群生效"
+  }
+}

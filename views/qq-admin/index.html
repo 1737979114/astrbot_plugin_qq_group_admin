@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QQ 官方群管</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1d2129;
+    --line: #262b35;
+    --text: #e8eaed;
+    --muted: #8b93a1;
+    --brand: #3b82f6;
+    --brand-soft: rgba(59, 130, 246, 0.14);
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --bad: #ef4444;
+    --radius: 12px;
+  }
+
+  body.light {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --panel-2: #f9fafb;
+    --line: #e5e7eb;
+    --text: #1c1f23;
+    --muted: #6b7280;
+    --brand-soft: rgba(59, 130, 246, 0.1);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Microsoft YaHei", sans-serif;
+    display: flex;
+    overflow: hidden;
+  }
+
+  aside {
+    width: 208px;
+    flex: none;
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 6px 16px; }
+
+  .brand .mark {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2f6bff, #5b8cff);
+    display: grid; place-items: center;
+    color: #fff;
+    flex: none;
+  }
+
+  .brand .mark svg { width: 19px; height: 19px; }
+  .brand b { font-size: 14px; font-weight: 600; }
+  .brand small { display: block; color: var(--muted); font-size: 11px; }
+
+  nav { display: flex; flex-direction: column; gap: 2px; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 11px;
+    border-radius: 9px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    font-size: 13.5px;
+    transition: background 0.14s, color 0.14s;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+  }
+
+  .nav-item svg { width: 17px; height: 17px; flex: none; opacity: 0.85; }
+  .nav-item:hover { background: var(--panel-2); color: var(--text); }
+  .nav-item.active { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+  .nav-item.active svg { opacity: 1; }
+
+  .nav-group {
+    color: var(--muted);
+    font-size: 11px;
+    padding: 14px 11px 6px;
+    opacity: 0.7;
+    letter-spacing: 0.4px;
+  }
+
+  aside .foot {
+    margin-top: auto;
+    padding: 10px 8px 2px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+  .dot.on { background: var(--ok); }
+  .dot.off { background: var(--bad); }
+
+  main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    height: 54px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+  }
+
+  .topbar h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  .topbar .desc { color: var(--muted); font-size: 12px; }
+  .topbar .spacer { flex: 1; }
+
+  .content { flex: 1; overflow-y: auto; padding: 20px 22px 40px; }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fade 0.18s ease; }
+
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .stat .top { display: flex; align-items: center; gap: 8px; }
+  .stat .ico {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: 13px;
+  }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .stat .v { font-size: 24px; font-weight: 650; margin-top: 8px; letter-spacing: 0.4px; }
+  .stat .v small { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 3px; }
+
+  .ico.red { background: rgba(239, 68, 68, 0.15); color: var(--bad); }
+  .ico.blue { background: rgba(59, 130, 246, 0.15); color: var(--brand); }
+  .ico.green { background: rgba(34, 197, 94, 0.15); color: var(--ok); }
+  .ico.amber { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .panel .head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .panel .head h2 { font-size: 13.5px; margin: 0; font-weight: 600; }
+  .panel .head .spacer { flex: 1; }
+  .panel .body { padding: 16px; }
+  .panel .body.tight { padding: 0; }
+
+  .muted { color: var(--muted); font-size: 12.5px; }
+  .empty { color: var(--muted); text-align: center; padding: 34px 10px; font-size: 13px; }
+
+  /* 成员页的说明卡 */
+  .notice {
+    margin: 14px 16px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    font-size: 12.8px;
+    line-height: 1.85;
+  }
+  .notice:first-child { margin-top: 16px; }
+  .notice .n-h { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; margin-bottom: 6px; }
+  .notice .n-b { color: var(--muted); }
+  .notice .n-b b { color: var(--text); font-weight: 600; }
+  .notice.ok { border-color: rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.07); }
+  .notice.ok .n-h { color: var(--ok); }
+  .notice.warn { border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.07); }
+  .notice.warn .n-h { color: var(--warn); }
+  .notice .kv { display: flex; gap: 8px; }
+  .notice .kv .k { color: var(--muted); min-width: 92px; flex: none; }
+  .notice .kv .v { color: var(--text); word-break: break-all; }
+
+  .sub-h {
+    padding: 14px 16px 8px;
+    font-size: 12.8px;
+    font-weight: 600;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sub-h .muted { font-weight: 400; }
+
+  #members-table { overflow-x: auto; }
+  td .row-actions { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
+  td .row-actions button,
+  td .row-actions select { white-space: nowrap; flex: none; }
+  td .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 10px;
+  }
+  .stat {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    min-width: 0;
+  }
+  .stat span { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: 4px; }
+  .stat b {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  select.mini { width: auto; padding: 3px 6px; font-size: 12px; border-radius: 7px; }
+
+  button {
+    font: inherit;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    color: var(--text);
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: border-color 0.14s, background 0.14s;
+  }
+  button:hover { border-color: var(--brand); }
+  button.primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+  button.primary:hover { background: #2f6bff; }
+  button.sm { padding: 4px 9px; font-size: 12px; }
+  button.danger { color: var(--bad); border-color: rgba(239, 68, 68, 0.35); }
+  button.ghost { background: transparent; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  input[type="text"], input[type="password"], input[type="number"], input:not([type]), select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--brand); }
+  textarea { resize: vertical; min-height: 68px; font-size: 13px; }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field > label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+  .row { display: flex; gap: 12px; }
+  .row > * { flex: 1; }
+
+  .checklist { display: flex; flex-direction: column; gap: 6px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+  .check-item input { accent-color: var(--brand); }
+
+  .switch { position: relative; width: 40px; height: 22px; flex: none; display: inline-block; }
+  .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .slider {
+    position: absolute; inset: 0;
+    background: var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.16s;
+  }
+  .slider::before {
+    content: "";
+    position: absolute;
+    width: 16px; height: 16px;
+    left: 3px; top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.16s;
+  }
+  .switch input:checked + .slider { background: var(--ok); }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row .text { flex: 1; min-width: 0; }
+  .toggle-row .text b { display: block; font-size: 13px; font-weight: 500; }
+  .toggle-row .text span { color: var(--muted); font-size: 11.5px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 11.5px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--panel-2); }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: var(--panel-2);
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .tag.ok { color: var(--ok); border-color: rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.1); }
+  .tag.bad { color: var(--bad); border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.1); }
+  .tag.warn { color: var(--warn); border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.1); }
+  .tag.blue { color: var(--brand); border-color: rgba(59, 130, 246, 0.35); background: rgba(59, 130, 246, 0.1); }
+
+  .chart { display: flex; align-items: flex-end; gap: 10px; height: 150px; padding: 8px 4px 0; }
+  .chart .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; }
+  .chart .bars { width: 100%; display: flex; gap: 3px; align-items: flex-end; justify-content: center; height: 100%; }
+  .chart .bar { width: 45%; border-radius: 3px 3px 0 0; min-height: 2px; }
+  .chart .bar.b1 { background: linear-gradient(180deg, #ef4444, #b91c1c); }
+  .chart .bar.b2 { background: linear-gradient(180deg, #22c55e, #15803d); }
+  .chart .lbl { font-size: 10.5px; color: var(--muted); }
+
+  .legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--muted); }
+  .legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+
+  .barlist { display: flex; flex-direction: column; gap: 9px; }
+  .barlist .item { display: grid; grid-template-columns: 70px 1fr 42px; align-items: center; gap: 10px; font-size: 12px; }
+  .barlist .track { height: 7px; background: var(--panel-2); border-radius: 999px; overflow: hidden; }
+  .barlist .fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 999px; }
+
+  .hours { display: flex; gap: 2px; align-items: flex-end; height: 58px; }
+  .hours .h { flex: 1; background: var(--brand-soft); border-radius: 2px 2px 0 0; min-height: 2px; }
+  .hours .h.hot { background: var(--brand); }
+
+  .group-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .group-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 13px;
+    background: var(--panel-2);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .group-card .top { display: flex; align-items: center; gap: 10px; }
+  .group-card .avatar {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #2f6bff, #5b8cff);
+    display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 600;
+    flex: none;
+  }
+  .group-card .name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .group-card .id { color: var(--muted); font-size: 11px; font-family: ui-monospace, monospace; }
+  .group-card .metrics { display: flex; gap: 14px; color: var(--muted); font-size: 11.5px; }
+
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tab {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12.5px;
+  }
+  .tab.active { background: var(--brand-soft); border-color: transparent; color: var(--brand); font-weight: 600; }
+
+  .tab-page { display: none; }
+  .tab-page.active { display: block; }
+
+  .savebar { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 12px 0 0; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%) translateY(14px);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s, transform 0.18s;
+    z-index: 99;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .pager { display: flex; align-items: center; gap: 10px; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid var(--line); }
+  .pager .info { color: var(--muted); font-size: 12px; margin-right: auto; }
+
+  @media (max-width: 880px) {
+    aside { width: 62px; padding: 14px 8px; }
+    .brand span, .nav-item span, .nav-group, aside .foot span { display: none; }
+    .nav-item { justify-content: center; }
+    .content { padding: 16px 14px 30px; }
+    .topbar { padding: 0 14px; }
+  }
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3 4.5 6v6c0 4.4 3.1 7.6 7.5 9 4.4-1.4 7.5-4.6 7.5-9V6L12 3Z" />
+        <path d="m8.8 12.2 2.2 2.2 4.2-4.4" />
+      </svg>
+    </div>
+    <span><b>Group Guardian</b><small>QQ 官方群管</small></span>
+  </div>
+
+  <div class="nav-group">监控</div>
+  <nav>
+    <button class="nav-item active" data-page="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>总览</span>
+    </button>
+    <button class="nav-item" data-page="groups">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-5.2 5.5-5.2S14.5 17 14.5 20"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M16 14.8c2.4-.3 4.5 1.6 4.5 4.2"/></svg>
+      <span>群管理</span>
+    </button>
+    <button class="nav-item" data-page="records">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <span>违规记录</span>
+    </button>
+    <button class="nav-item" data-page="members">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2"/></svg>
+      <span>成员查询</span>
+    </button>
+  </nav>
+
+  <div class="nav-group">策略</div>
+  <nav>
+    <button class="nav-item" data-page="rules">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+      <span>规则中心</span>
+    </button>
+    <button class="nav-item" data-page="spam">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17l5-6 4 3 4-7 5 4"/><path d="M3 21h18"/></svg>
+      <span>刷屏监控</span>
+    </button>
+    <button class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
+      <span>设置</span>
+    </button>
+  </nav>
+
+  <div class="foot"><i class="dot" id="foot-dot"></i><span id="foot-text">未连接</span></div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <h1 id="page-title">总览</h1>
+    <span class="desc" id="page-desc">实时防护数据与今日拦截情况</span>
+    <div class="spacer"></div>
+    <button class="ghost sm" id="btn-refresh">刷新</button>
+  </div>
+
+  <div class="content">
+    <section class="page active" id="page-overview">
+      <div class="cards">
+        <div class="card stat"><div class="top"><div class="ico red">⛔</div><div class="k">今日拦截</div></div><div class="v" id="ov-blocked">0<small>条</small></div></div>
+        <div class="card stat"><div class="top"><div class="ico blue">🔍</div><div class="k">今日审核</div></div><div class="v" id="ov-checked">0<small>条</small></div></div>
+        <div class="card stat"><div class="top"><div class="ico green">✅</div><div class="k">今日放行</div></div><div class="v" id="ov-passed">0<small>条</small></div></div>
+        <div class="card stat"><div class="top"><div class="ico amber">📌</div><div class="k">累计记录</div></div><div class="v" id="ov-total">0<small>条</small></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="head">
+          <h2>数据仪表盘</h2><div class="spacer"></div>
+          <div class="legend"><span><i style="background:#ef4444"></i>拦截</span><span><i style="background:#22c55e"></i>放行</span></div>
+        </div>
+        <div class="body"><div class="chart" id="ov-chart"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="panel" style="flex:1">
+          <div class="head"><h2>违规类型分布</h2></div>
+          <div class="body"><div class="barlist" id="ov-kinds"><div class="empty">暂无数据</div></div></div>
+        </div>
+        <div class="panel" style="flex:1">
+          <div class="head"><h2>拦截时段分布</h2></div>
+          <div class="body">
+            <div class="hours" id="ov-hours"></div>
+            <div class="muted" style="margin-top:8px;display:flex;justify-content:space-between"><span>00:00</span><span>12:00</span><span>23:00</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="head"><h2>最近拦截</h2></div>
+        <div class="body tight" id="ov-recent"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-groups">
+      <div class="panel">
+        <div class="head">
+          <h2>群列表</h2><div class="spacer"></div>
+          <span class="muted" id="groups-total">0 个群</span>
+          <button class="sm" id="btn-groups-sync">同步群列表</button>
+          <button class="sm" id="btn-groups-refresh">刷新</button>
+        </div>
+        <div class="body">
+          <div class="row" style="align-items:flex-end;gap:8px;margin-bottom:14px">
+            <div class="field" style="flex:1"><label>手动登记群（群 openid）</label><input id="group-add-input" placeholder="例如 1A2B3C4D5E6F…" /></div>
+            <button class="sm" id="btn-group-add" style="flex:none;white-space:nowrap">添加</button>
+          </div>
+          <div class="group-grid" id="groups-grid"></div>
+        </div>
+      </div>
+      <div class="muted" style="line-height:1.8">
+        官方<b>没有群列表接口</b>，所以这里只能列「本地知道的群」：机器人被 @ 过的群、以及 AstrBot 消息历史里出现过的群。
+        「同步群列表」会重新扫一遍这些线索，并逐个查群名确认机器人还在群里。<br />
+        从没被 @ 过的群仍然看不到，这类把群 openid 填到上面手动登记即可（群 openid 可以看「成员查询」里的群信息，或从入群欢迎记录里拿）。
+      </div>
+    </section>
+
+    <section class="page" id="page-records">
+      <div class="panel">
+        <div class="head">
+          <h2>违规记录</h2><div class="spacer"></div>
+          <select id="records-kind" style="width:130px"><option value="">全部类型</option></select>
+          <button class="sm" id="btn-records-refresh">刷新</button>
+        </div>
+        <div class="body tight" id="records-table"></div>
+        <div class="pager">
+          <span class="info" id="records-info">共 0 条</span>
+          <button class="sm" id="records-prev">上一页</button>
+          <button class="sm" id="records-next">下一页</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-rules">
+      <div class="panel">
+        <div class="head">
+          <h2>规则词库</h2><div class="spacer"></div>
+          <span class="muted" id="rules-total">0 条</span>
+          <button class="sm" id="btn-rules-seed">导入预置</button>
+          <button class="sm danger" id="btn-rules-clear">清空自定义</button>
+        </div>
+        <div class="body">
+          <div class="row" style="margin-bottom:12px">
+            <input id="rule-input" type="text" placeholder="添加自定义关键词，例如「加微信」" />
+            <button class="primary" id="btn-rule-add" style="flex:none">添加</button>
+          </div>
+
+          <div class="row" style="margin-bottom:12px">
+            <input id="rules-q" type="text" placeholder="搜索关键词" />
+            <select id="rules-cat" style="flex:none;width:170px"><option value="all">全部已启用</option></select>
+            <button id="btn-rules-search" style="flex:none">查询</button>
+          </div>
+
+          <div class="muted" id="rules-summary" style="margin-bottom:12px"></div>
+          <div id="rules-table"></div>
+
+          <div class="pager" style="padding:12px 0 0;border-top:none">
+            <span class="info" id="rules-page-info">共 0 条</span>
+            <button class="sm" id="rules-prev">上一页</button>
+            <button class="sm" id="rules-next">下一页</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="head"><h2>词库分类</h2><div class="spacer"></div><span class="muted">勾选后立即生效</span></div>
+        <div class="body"><div id="rules-cats" class="checklist"></div></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-spam">
+      <div class="cards">
+        <div class="card stat"><div class="top"><div class="ico green">📡</div><div class="k">监控状态</div></div><div class="v" id="spam-status" style="font-size:18px">未开启</div></div>
+        <div class="card stat"><div class="top"><div class="ico blue">⏱</div><div class="k">统计窗口</div></div><div class="v" id="spam-window">60<small>秒</small></div></div>
+        <div class="card stat"><div class="top"><div class="ico amber">⚠</div><div class="k">触发阈值</div></div><div class="v" id="spam-limit">10<small>条</small></div></div>
+        <div class="card stat"><div class="top"><div class="ico red">👤</div><div class="k">高频用户</div></div><div class="v" id="spam-users">0<small>人</small></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="head"><h2>实时频率</h2></div>
+        <div class="body tight" id="spam-table"></div>
+      </div>
+
+      <div class="panel">
+        <div class="head"><h2>刷屏设置</h2></div>
+        <div class="body">
+          <div class="toggle-row">
+            <div class="text"><b>开启刷屏检测</b><span>超过阈值直接按审核处置方式处理</span></div>
+            <label class="switch"><input type="checkbox" id="spam_enabled" /><span class="slider"></span></label>
+          </div>
+          <div class="row" style="margin-top:14px">
+            <div class="field"><label>统计窗口（秒）</label><input id="spam_window" type="number" min="10" max="600" value="60" /></div>
+            <div class="field"><label>窗口内条数上限</label><input id="spam_limit" type="number" min="3" max="50" value="10" /></div>
+          </div>
+          <button class="primary" id="btn-spam-save">保存刷屏设置</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-members">
+      <div class="panel">
+        <div class="head">
+          <h2>群成员管理</h2>
+          <div class="spacer"></div>
+          <input id="member-group" placeholder="群 openid" style="width:280px" />
+          <button class="primary" id="btn-members">查询</button>
+        </div>
+        <div class="body" id="member-summary">
+          <div class="empty">输入群 openid 后查询，或从「群管理」点「查看成员」</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="head">
+          <h2>成员</h2>
+          <div class="spacer"></div>
+          <input id="member-keyword" placeholder="搜昵称 / openid" style="width:170px" />
+          <button class="sm" id="btn-member-search">搜索</button>
+        </div>
+        <div class="body tight" id="members-table"><div class="empty">还没有查询</div></div>
+        <div class="body" id="members-pager" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="muted" id="members-info"></span>
+            <div class="spacer" style="flex:1"></div>
+            <button class="sm" id="members-prev">上一页</button>
+            <button class="sm" id="members-next">下一页</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="head"><h2>手动操作</h2><span class="muted" style="margin-left:8px">知道 openid 时直接填</span></div>
+        <div class="body">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input id="manual-openid" placeholder="成员 openid（群里发「/我的id」可查）" style="flex:1;min-width:260px" />
+            <select id="manual-seconds" style="width:130px">
+              <option value="600">禁言 10 分钟</option>
+              <option value="3600">禁言 1 小时</option>
+              <option value="86400">禁言 1 天</option>
+              <option value="604800">禁言 7 天</option>
+            </select>
+            <button class="sm" data-manual="mute">禁言</button>
+            <button class="sm" data-manual="unmute">解除禁言</button>
+            <button class="sm danger" data-manual="kick">踢出</button>
+            <button class="sm" data-manual="grant">设为群管</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="muted" style="line-height:1.8">
+        官方「获取群成员列表」是应用级内邀权限（11253），个人开发者拿不到，所以这里的名单是
+        <b>插件自己攒的</b>：群成员每发一条消息就登记一次，昵称和 openid 都会更新。
+        从没说过话的人不会出现，这类只能手动填 openid 操作。
+      </div>
+    </section>
+
+    <section class="page" id="page-settings">
+      <div class="tabs">
+        <button class="tab active" data-tab="core">核心</button>
+        <button class="tab" data-tab="audit">审核</button>
+        <button class="tab" data-tab="lexicon">词库</button>
+        <button class="tab" data-tab="list">名单</button>
+        <button class="tab" data-tab="feature">功能</button>
+        <button class="tab" data-tab="adv">高级</button>
+      </div>
+
+      <div class="tab-page active" id="tab-core">
+        <div class="panel">
+          <div class="head"><h2>核心设置</h2></div>
+          <div class="body">
+            <div class="toggle-row">
+              <div class="text"><b>启用群管命令</b><span>关闭后禁言、撤回等命令都不响应</span></div>
+              <label class="switch"><input type="checkbox" id="enable" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>开启智能审核</b><span>规则词 + 模型判定，命中后按处置方式处理</span></div>
+              <label class="switch"><input type="checkbox" id="moderation_enabled" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>使用模型判定</b><span>关闭后只靠规则词，零成本但只能拦关键词</span></div>
+              <label class="switch"><input type="checkbox" id="moderation_use_llm" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>缓存群消息</b><span>撤回功能依赖缓存定位目标，关闭后撤回不可用</span></div>
+              <label class="switch"><input type="checkbox" id="cache_messages" /><span class="slider"></span></label>
+            </div>
+
+            <div class="row" style="margin-top:16px">
+              <div class="field">
+                <label>违规处置方式</label>
+                <select id="moderation_action">
+                  <option value="recall">撤回消息</option>
+                  <option value="mute">禁言成员</option>
+                  <option value="warn">仅提醒</option>
+                </select>
+              </div>
+              <div class="field"><label>审核禁言时长（秒）</label><input id="moderation_mute_seconds" type="number" min="60" step="60" value="600" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="head"><h2>生效平台与审核模型</h2></div>
+          <div class="body">
+            <div class="field">
+              <label>生效的机器人实例（不勾选表示全部 QQ 官方实例）</label>
+              <div id="platform-list" class="checklist"><div class="muted">加载中…</div></div>
+            </div>
+            <div class="field">
+              <label>审核使用的模型</label>
+              <select id="llm_provider_id"><option value="">跟随会话默认</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="head"><h2>连接与凭据</h2></div>
+          <div class="body">
+            <div class="field"><label>AppID</label><input id="app_id" type="text" placeholder="开放平台 → 开发设置" /></div>
+            <div class="field">
+              <label>AppSecret</label>
+              <div class="row">
+                <input id="app_secret" type="password" placeholder="未设置" />
+                <button class="ghost" id="toggle-secret" style="flex:none">显示</button>
+              </div>
+            </div>
+            <div class="field"><label>测试群 openid（可选）</label><input id="test_group" type="text" placeholder="填了会顺便验证管理权限" /></div>
+            <div class="row">
+              <button id="btn-test" style="flex:none">测试连接</button>
+              <div class="muted" id="test-result" style="display:flex;align-items:center"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="tab-audit">
+        <div class="panel">
+          <div class="head"><h2>审核行为</h2></div>
+          <div class="body">
+            <div class="toggle-row">
+              <div class="text"><b>管理员消息豁免</b><span>管理员名单里的成员不会被审核</span></div>
+              <label class="switch"><input type="checkbox" id="moderation_admin_exempt" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>处置后在群里提示</b><span>撤回/禁言后发一条说明，关闭则静默处理</span></div>
+              <label class="switch"><input type="checkbox" id="moderation_notify" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>模型失败时放行</b><span>关闭后模型超时/报错会按违规处理，更严格但可能误伤</span></div>
+              <label class="switch"><input type="checkbox" id="moderation_fail_open" /><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="head"><h2>审核提示词</h2></div>
+          <div class="body">
+            <div class="field">
+              <label>留空使用内置提示词，{text} 代表消息内容</label>
+              <textarea id="moderation_prompt" rows="5" placeholder="判断消息是否违规，只输出 JSON…"></textarea>
+            </div>
+            <div class="muted">规则词在「规则中心」维护；词库分类在「词库」页勾选。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="tab-lexicon">
+        <div class="panel">
+          <div class="head"><h2>词库</h2><div class="spacer"></div><button class="sm" id="btn-goto-rules">去规则中心</button></div>
+          <div class="body">
+            <div class="toggle-row">
+              <div class="text"><b>自动导入预置规则</b><span>规则词为空时自动装一套中文广告/诈骗/辱骂常用词</span></div>
+              <label class="switch"><input type="checkbox" id="auto_seed_rules" /><span class="slider"></span></label>
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label>已启用词库</label>
+              <div class="muted" id="lexicon-summary">—</div>
+            </div>
+            <div class="muted">
+              内置 45623 条分类词库，按分类启用。政治、违规网址、民生等分类默认关闭，
+              可在「规则中心 → 词库分类」里按需勾选。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="tab-list">
+        <div class="panel">
+          <div class="head"><h2>管理员名单</h2></div>
+          <div class="body">
+            <div class="field">
+              <label>每行一个 openid，成员发「我的id」可获取</label>
+              <textarea id="admin_openids" rows="6" placeholder="EC58D87F598C8294A533B9D458DAAF33"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="head"><h2>群管理员（按群）</h2></div>
+          <div class="body">
+            <div class="field">
+              <label>JSON：{"群 openid": ["成员 openid", ...]}；也可以在群里发「/添加群管 @某人」</label>
+              <textarea id="group_admins" rows="6" placeholder='{"F1220577B78CD08334C7B1F5DA2959B5": ["EC58D87F598C8294A533B9D458DAAF33"]}'></textarea>
+            </div>
+            <div class="muted">这里的人只能管自己那个群；「管理员名单」对全部群生效。</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="head"><h2>审核白名单</h2></div>
+          <div class="body">
+            <div class="field"><label>每行一个 openid，这些人的消息不会被审核</label><textarea id="moderation_whitelist" rows="5"></textarea></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="head"><h2>群白名单</h2></div>
+          <div class="body">
+            <div class="field"><label>每行一个群 openid，这些群完全不审核</label><textarea id="group_whitelist" rows="4"></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="tab-feature">
+        <div class="panel">
+          <div class="head"><h2>命令开关</h2></div>
+          <div class="body">
+            <div class="toggle-row">
+              <div class="text"><b>禁言 / 解除禁言</b><span>关闭后这两个命令不响应</span></div>
+              <label class="switch"><input type="checkbox" id="mute_enabled" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>踢人</b><span>批量移除成员，需要内邀权限</span></div>
+              <label class="switch"><input type="checkbox" id="kick_enabled" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>撤回消息</b><span>关闭后「撤回」不响应，也不影响审核自动撤回</span></div>
+              <label class="switch"><input type="checkbox" id="recall_enabled" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>全员禁言</b><span>开启/解除全员禁言</span></div>
+              <label class="switch"><input type="checkbox" id="whole_ban_enabled" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>群信息 / 成员查询</b><span>群资料、成员列表、成员详情</span></div>
+              <label class="switch"><input type="checkbox" id="member_query_enabled" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>入群申请</b><span>查看待审批的入群请求</span></div>
+              <label class="switch"><input type="checkbox" id="join_request_enabled" /><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="text"><b>到期自动解禁</b><span>禁言时间到了自动解禁，重启后计划不丢</span></div>
+              <label class="switch"><input type="checkbox" id="auto_unmute" /><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="tab-adv">
+        <div class="panel">
+          <div class="head"><h2>高级</h2></div>
+          <div class="body">
+            <div class="row">
+              <div class="field"><label>接口超时（秒）</label><input id="timeout" type="number" min="5" max="60" value="10" /></div>
+              <div class="field"><label>每群缓存条数</label><input id="cache_size" type="number" min="5" max="200" value="30" /></div>
+              <div class="field"><label>缓存保留（秒）</label><input id="cache_ttl" type="number" min="120" max="3600" value="600" /></div>
+            </div>
+            <div class="row">
+              <div class="field"><label>违规记录上限</label><input id="max_records" type="number" min="50" max="2000" value="500" /></div>
+              <div class="field"><label>命令冷却（秒）</label><input id="command_rate_limit" type="number" min="0" max="60" value="0" /></div>
+            </div>
+            <div class="muted" style="margin-bottom:10px">命令冷却：同一个人两次群管命令之间的最小间隔，0 表示不限制。</div>
+            <div class="toggle-row">
+              <div class="text"><b>校验 HTTPS 证书</b><span>代理环境报证书错误时可以关掉</span></div>
+              <label class="switch"><input type="checkbox" id="verify_ssl" /><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="savebar">
+        <button class="ghost" id="btn-reload">重新读取</button>
+        <button class="primary" id="btn-save">保存设置</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var PLUGIN = "astrbot_plugin_qq_group_admin";
+  var $ = function (id) { return document.getElementById(id); };
+  var state = {
+    page: "overview",
+    recordsPage: 1,
+    recordsKind: "",
+    recordsPages: 1,
+    rulesPage: 1,
+    rulesPages: 1,
+    memberGroup: "",
+    memberPage: 1,
+    memberSize: 50,
+    memberKeyword: "",
+  };
+
+  function getBridge() {
+    return window.AstrBotPluginView || window.AstrBotPluginPage || null;
+  }
+
+  async function waitBridge(timeout) {
+    var start = Date.now();
+    while (Date.now() - start < (timeout || 1200)) {
+      var bridge = getBridge();
+      if (bridge && typeof bridge.apiGet === "function") return bridge;
+      await new Promise(function (resolve) { setTimeout(resolve, 60); });
+    }
+    return null;
+  }
+
+  var TITLES = {
+    overview: ["总览", "实时防护数据与今日拦截情况"],
+    groups: ["群管理", "机器人能看到的群与拦截统计"],
+    records: ["违规记录", "按类型筛选、标记误判或删除"],
+    members: ["群成员管理", "查看成员并直接禁言 / 解禁 / 踢人"],
+    rules: ["规则中心", "命中即处置的关键词库"],
+    spam: ["刷屏监控", "消息频率与阈值设置"],
+    settings: ["设置", "凭据、审核、名单与高级选项"],
+  };
+
+  function toast(text) {
+    var el = $("toast");
+    el.textContent = text;
+    el.classList.add("show");
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove("show"); }, 2400);
+  }
+
+  async function callApi(name, method, body) {
+    var bridge = await waitBridge(1200);
+    if (bridge) {
+      if (method === "GET" && typeof bridge.apiGet === "function") {
+        return bridge.apiGet(name, body || undefined);
+      }
+      if (method === "POST" && typeof bridge.apiPost === "function") {
+        return bridge.apiPost(name, body || {});
+      }
+    }
+
+    // 没有桥接（或桥接还没注入）时直连 Dashboard 的 legacy 扩展路由
+    var url = "/api/plug/" + PLUGIN + "/" + name;
+    if (method === "GET" && body) {
+      var qs = Object.keys(body).map(function (key) {
+        return encodeURIComponent(key) + "=" + encodeURIComponent(body[key]);
+      }).join("&");
+      if (qs) url += "?" + qs;
+    }
+
+    var res = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: method === "POST" ? JSON.stringify(body || {}) : undefined,
+    });
+    return res.json();
+  }
+
+  function unwrap(res) {
+    if (!res) throw new Error("没有返回数据");
+    if (res.status === "error") throw new Error(res.message || "请求失败");
+    if (res.ok === false) throw new Error(res.message || "请求失败");
+    return res.data !== undefined ? res.data : res;
+  }
+
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"]/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch];
+    });
+  }
+
+  function lines(value) {
+    return (value || "").split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+
+  function statusTag(status) {
+    if (status === "confirm") return '<span class="tag ok">已确认</span>';
+    if (status === "misjudge") return '<span class="tag warn">误判</span>';
+    return '<span class="tag">待复核</span>';
+  }
+
+  function switchPage(name) {
+    state.page = name;
+    document.querySelectorAll(".nav-item").forEach(function (el) {
+      el.classList.toggle("active", el.dataset.page === name);
+    });
+    document.querySelectorAll(".page").forEach(function (el) {
+      el.classList.toggle("active", el.id === "page-" + name);
+    });
+    $("page-title").textContent = TITLES[name][0];
+    $("page-desc").textContent = TITLES[name][1];
+    loadPage(name);
+  }
+
+  function loadPage(name) {
+    if (name === "overview") loadOverview();
+    if (name === "groups") loadGroups();
+    if (name === "records") loadRecords();
+    if (name === "members") loadMembersPage();
+    if (name === "rules") loadRules();
+    if (name === "spam") loadSpam();
+    if (name === "settings") loadSettings();
+  }
+
+  /* ---------------- 总览 ---------------- */
+
+  async function loadOverview() {
+    try {
+      var data = unwrap(await callApi("overview", "GET"));
+      var cards = data.cards || {};
+      $("ov-blocked").innerHTML = (cards.today_blocked || 0) + "<small>条</small>";
+      $("ov-checked").innerHTML = (cards.today_checked || 0) + "<small>条</small>";
+      $("ov-passed").innerHTML = (cards.today_passed || 0) + "<small>条</small>";
+      $("ov-total").innerHTML = (cards.total_records || 0) + "<small>条</small>";
+
+      var max = 1;
+      (data.daily || []).forEach(function (d) { max = Math.max(max, d.blocked, d.passed); });
+
+      $("ov-chart").innerHTML = (data.daily || []).map(function (d) {
+        var h1 = Math.max(2, Math.round((d.blocked / max) * 120));
+        var h2 = Math.max(2, Math.round((d.passed / max) * 120));
+        return '<div class="col"><div class="bars">' +
+          '<div class="bar b1" style="height:' + h1 + 'px" title="拦截 ' + d.blocked + '"></div>' +
+          '<div class="bar b2" style="height:' + h2 + 'px" title="放行 ' + d.passed + '"></div>' +
+          '</div><div class="lbl">' + esc(d.date) + "</div></div>";
+      }).join("");
+
+      var kinds = data.kinds || [];
+      if (!kinds.length) {
+        $("ov-kinds").innerHTML = '<div class="empty">暂无数据</div>';
+      } else {
+        var kmax = Math.max.apply(null, kinds.map(function (k) { return k.count; }));
+        $("ov-kinds").innerHTML = kinds.map(function (k) {
+          var pct = kmax ? Math.round((k.count / kmax) * 100) : 0;
+          return '<div class="item"><span>' + esc(k.name) + '</span>' +
+            '<span class="track"><span class="fill" style="width:' + pct + '%"></span></span>' +
+            '<span>' + k.count + "</span></div>";
+        }).join("");
+      }
+
+      var hours = data.hours || [];
+      var hmax = Math.max.apply(null, hours.concat([1]));
+      $("ov-hours").innerHTML = hours.map(function (count) {
+        var h = Math.max(2, Math.round((count / hmax) * 54));
+        return '<div class="h' + (count === hmax && count > 0 ? " hot" : "") + '" style="height:' + h + 'px" title="' + count + ' 条"></div>';
+      }).join("");
+
+      renderRecent(data.recent || []);
+      $("foot-dot").className = "dot on";
+      $("foot-text").textContent = "已连接";
+    } catch (err) {
+      $("foot-dot").className = "dot off";
+      $("foot-text").textContent = "连接异常";
+      toast("读取总览失败：" + err.message);
+    }
+  }
+
+  function renderRecent(items) {
+    var box = $("ov-recent");
+    if (!items.length) {
+      box.innerHTML = '<div class="empty">还没有拦截记录</div>';
+      return;
+    }
+    var html = "<table><thead><tr><th>时间</th><th>用户</th><th>类型</th><th>原因</th><th>处置</th></tr></thead><tbody>";
+    items.forEach(function (r) {
+      html += "<tr><td>" + esc(r.time) + "</td><td>" + esc(r.name) + "</td><td><span class='tag blue'>" +
+        esc(r.kind) + "</span></td><td>" + esc(r.reason) + "</td><td>" + esc(r.action) + "</td></tr>";
+    });
+    box.innerHTML = html + "</tbody></table>";
+  }
+
+  /* ---------------- 群管理 ---------------- */
+
+  $("btn-groups-refresh").addEventListener("click", function () {
+    loadGroups();
+  });
+
+  $("btn-groups-sync").addEventListener("click", async function () {
+    this.disabled = true;
+    try {
+      var data = unwrap(await callApi("groups/sync", "POST", {}));
+      toast(data.message || "已同步");
+      loadGroups();
+    } catch (err) {
+      toast("同步失败：" + err.message);
+    } finally {
+      this.disabled = false;
+    }
+  });
+
+  $("btn-group-add").addEventListener("click", async function () {
+    var gid = ($("group-add-input").value || "").trim();
+    if (!gid) {
+      toast("请先填写群 openid");
+      return;
+    }
+    try {
+      var info = unwrap(await callApi("groups/add", "POST", { group_id: gid }));
+      toast(info && info.name ? "已添加：" + info.name : "已添加这个群");
+      $("group-add-input").value = "";
+      loadGroups();
+    } catch (err) {
+      toast("添加失败：" + err.message);
+    }
+  });
+
+  async function loadGroups() {
+    try {
+      var data = unwrap(await callApi("groups", "GET"));
+      var rows = data.groups || [];
+      $("groups-total").textContent = (data.total || 0) + " 个群";
+      if (!rows.length) {
+        $("groups-grid").innerHTML = '<div class="empty" style="grid-column:1/-1">还没有记录到群。在群里随便发一句话，或在上方手动登记群 openid。</div>';
+        return;
+      }
+      $("groups-grid").innerHTML = rows.map(function (g) {
+        var name = g.name || "未命名群（点同步取名字）";
+        var metrics = [];
+        metrics.push("名册 " + (g.roster || 0) + " 人");
+        if (g.member_count) metrics.push("群人数 " + g.member_count);
+        metrics.push("拦截 " + g.blocked + " 条");
+        metrics.push(g.last_seen);
+        return '<div class="group-card">' +
+          '<div class="top"><div class="avatar">' + esc(name.slice(0, 1)) + '</div>' +
+          '<div style="min-width:0"><div class="name">' + esc(name) + '</div>' +
+          '<div class="id">' + esc(String(g.group_id).slice(0, 14)) + '…</div></div></div>' +
+          '<div class="metrics">' + metrics.map(function (m) { return "<span>" + esc(m) + "</span>"; }).join("") + '</div>' +
+          '<button class="sm" data-group="' + esc(g.group_id) + '" data-open-members="1">查看成员</button>' +
+          "</div>";
+      }).join("");
+    } catch (err) {
+      toast("读取群列表失败：" + err.message);
+    }
+  }
+
+  /* ---------------- 违规记录 ---------------- */
+
+  async function loadRecords() {
+    try {
+      var params = { page: state.recordsPage, size: 20 };
+      if (state.recordsKind) params.kind = state.recordsKind;
+      var data = unwrap(await callApi("records", "GET", params));
+
+      if (data.kinds && data.kinds.length) {
+        var sel = $("records-kind");
+        if (sel.options.length <= 1) {
+          data.kinds.forEach(function (k) {
+            var opt = document.createElement("option");
+            opt.value = k;
+            opt.textContent = k;
+            sel.appendChild(opt);
+          });
+        }
+      }
+
+      var items = data.items || [];
+      var box = $("records-table");
+      if (!items.length) {
+        box.innerHTML = '<div class="empty">没有符合条件的记录</div>';
+      } else {
+        var html = "<table><thead><tr><th>时间</th><th>用户</th><th>类型</th><th>原因</th><th>处置</th><th>状态</th><th>操作</th></tr></thead><tbody>";
+        items.forEach(function (r) {
+          html += "<tr><td>" + esc(r.time) + "</td><td>" + esc(r.name) + "</td>" +
+            "<td><span class='tag blue'>" + esc(r.kind) + "</span></td><td>" + esc(r.reason) + "</td>" +
+            "<td>" + esc(r.action) + "</td><td>" + statusTag(r.status) + "</td>" +
+            "<td><button class='sm' data-act='confirm' data-id='" + r.id + "'>确认</button> " +
+            "<button class='sm' data-act='misjudge' data-id='" + r.id + "'>误判</button> " +
+            "<button class='sm danger' data-act='delete' data-id='" + r.id + "'>删除</button></td></tr>";
+        });
+        box.innerHTML = html + "</tbody></table>";
+      }
+
+      var total = data.total || 0;
+      var pages = Math.max(1, Math.ceil(total / (data.size || 20)));
+      $("records-info").textContent = "共 " + total + " 条 · 第 " + state.recordsPage + "/" + pages + " 页";
+      $("records-prev").disabled = state.recordsPage <= 1;
+      $("records-next").disabled = state.recordsPage >= pages;
+      state.recordsPages = pages;
+    } catch (err) {
+      toast("读取记录失败：" + err.message);
+    }
+  }
+
+  /* ---------------- 群成员管理 ---------------- */
+
+  var MUTE_OPTIONS = [
+    { value: 600, label: "10 分钟" },
+    { value: 3600, label: "1 小时" },
+    { value: 86400, label: "1 天" },
+    { value: 604800, label: "7 天" },
+  ];
+
+  function memberGroup() {
+    return ($("member-group").value || "").trim();
+  }
+
+  async function loadMembersPage() {
+    var group = memberGroup();
+    if (group) await queryMembers(group, 1);
+  }
+
+  async function queryMembers(group, page) {
+    state.memberGroup = group;
+    state.memberPage = page || 1;
+    var box = $("members-table");
+    box.innerHTML = '<div class="empty">查询中…</div>';
+    try {
+      var data = unwrap(
+        await callApi("members", "GET", {
+          group: group,
+          keyword: state.memberKeyword || "",
+          page: state.memberPage,
+          size: state.memberSize,
+        })
+      );
+      renderMemberSummary(data);
+      renderMemberTable(data);
+    } catch (err) {
+      box.innerHTML = '<div class="empty">查询失败：' + esc(err.message) + "</div>";
+      $("member-summary").innerHTML = '<div class="empty">查询失败：' + esc(err.message) + "</div>";
+    }
+  }
+
+  function renderMemberSummary(data) {
+    var box = $("member-summary");
+    var role = data.bot_role || "";
+    var isAdmin = role === "admin" || role === "owner";
+    var roleText = role === "owner" ? "群主" : role === "admin" ? "管理员" : role ? "普通成员" : "未知";
+
+    var html =
+      '<div class="summary-grid">' +
+      '<div class="stat"><span>群名</span><b>' + esc(data.group_name || "未取到") + "</b></div>" +
+      '<div class="stat"><span>群人数</span><b>' + (data.member_count || "-") + "</b></div>" +
+      '<div class="stat"><span>已记录成员</span><b>' + (data.roster_total || 0) + "</b></div>" +
+      '<div class="stat"><span>禁言中</span><b>' + (data.muted_count || 0) + "</b></div>" +
+      '<div class="stat"><span>机器人身份</span><b>' + esc(roleText) + "</b></div>" +
+      "</div>";
+
+    if (data.api_ready === false) {
+      html +=
+        '<div class="notice warn"><div class="n-h"><span class="tag warn">未配置</span>缺少凭据</div>' +
+        '<div class="n-b">先在「设置 → 核心」里填 AppID / AppSecret，否则禁言、踢人都调不动接口。</div></div>';
+    } else if (!isAdmin) {
+      html +=
+        '<div class="notice warn"><div class="n-h"><span class="tag warn">需要处理</span>机器人是' +
+        esc(roleText) + "</div>" +
+        '<div class="n-b">去群设置把机器人设为<b>群管理员</b>，否则禁言 / 踢人会提示「没有操作权限」。</div></div>';
+    } else {
+      html +=
+        '<div class="notice ok"><div class="n-h"><span class="tag ok">可操作</span>机器人是本群' +
+        esc(roleText) + "</div>" +
+        '<div class="n-b">可以直接在下面的表格里禁言 / 解禁 / 踢人。'
+        + (data.api_available ? "当前应用有成员列表权限，名单是官方数据。" : "官方不给成员列表，这里的名单是插件自己攒的。")
+        + "</div></div>";
+    }
+
+    box.innerHTML = html;
+  }
+
+  function renderMemberTable(data) {
+    var box = $("members-table");
+    var rows = data.members || [];
+    var total = data.total || 0;
+    var size = data.size || 50;
+    var pages = Math.max(1, Math.ceil(total / size));
+
+    $("members-pager").style.display = total ? "" : "none";
+    $("members-info").textContent = "共 " + total + " 人 · 第 " + (data.page || 1) + "/" + pages + " 页";
+    $("members-prev").disabled = (data.page || 1) <= 1;
+    $("members-next").disabled = (data.page || 1) >= pages;
+
+    if (!rows.length) {
+      box.innerHTML = data.keyword
+        ? '<div class="empty">没有匹配「' + esc(data.keyword) + '」的成员。</div>'
+        : '<div class="empty" style="line-height:2">这个群还没记录到成员。<br />' +
+          "群成员随便发一句话就会自动登记（机器人要在群里，开放平台需开启「接收所有消息」）。<br />" +
+          "从没说过话的人查不到，可以在下面「手动操作」里直接填 openid。</div>";
+      return;
+    }
+
+    var html =
+      "<table><thead><tr><th>昵称</th><th>openid</th><th>最近发言</th>" +
+      "<th>身份</th><th>状态</th><th style='min-width:300px'>操作</th></tr></thead><tbody>";
+
+    rows.forEach(function (m) {
+      var tags = "";
+      if (m.is_global_admin) tags += '<span class="tag blue">全局管理员</span> ';
+      if (m.is_group_admin) tags += '<span class="tag ok">本群群管</span>';
+      if (!tags) tags = '<span class="tag">成员</span>';
+
+      var muted = !!m.muted_until;
+      var status = muted
+        ? '<span class="tag bad" title="' + esc(m.muted_until) + '">禁言中</span>'
+        : '<span class="muted">正常</span>';
+
+      var options = MUTE_OPTIONS.map(function (o) {
+        return '<option value="' + o.value + '">' + o.label + "</option>";
+      }).join("");
+
+      html +=
+        '<tr data-openid="' + esc(m.openid) + '" data-name="' + esc(m.name || "") + '">' +
+        "<td>" + esc(m.name || "-") + "</td>" +
+        '<td class="mono" title="' + esc(m.openid) + '">' + esc(String(m.openid).slice(0, 10)) + "…</td>" +
+        "<td>" + esc(m.last_seen || "-") + "</td>" +
+        "<td>" + tags + "</td>" +
+        "<td>" + status + "</td>" +
+        '<td><div class="row-actions">' +
+        '<select class="mini" data-seconds>' + options + "</select>" +
+        '<button class="sm" data-act="mute">禁言</button>' +
+        (muted ? '<button class="sm" data-act="unmute">解禁</button>' : "") +
+        '<button class="sm danger" data-act="kick">踢出</button>' +
+        (m.is_group_admin
+          ? '<button class="sm ghost" data-act="revoke">移出群管</button>'
+          : '<button class="sm ghost" data-act="grant">设群管</button>') +
+        "</div></td></tr>";
+    });
+
+    box.innerHTML = html + "</tbody></table>";
+  }
+
+  async function memberAction(openid, name, action, seconds, group) {
+    var target = group || state.memberGroup;
+    if (!target) return toast("先查询一个群");
+    if (!openid) return toast("缺少 openid");
+
+    var label = name || openid.slice(0, 8);
+    if (action === "kick" && !window.confirm("确认把「" + label + "」踢出群？")) return;
+
+    try {
+      var data = unwrap(
+        await callApi("members/action", "POST", {
+          group: target,
+          openid: openid,
+          name: name || "",
+          action: action,
+          seconds: seconds,
+        })
+      );
+      toast((data && data.message) || "操作成功");
+      await queryMembers(target, state.memberPage);
+    } catch (err) {
+      toast("操作失败：" + err.message);
+    }
+  }
+
+  function initMemberActions() {
+    var box = $("members-table");
+
+    // 表格每次查询都重绘，用事件委托，避免重复绑定
+    box.addEventListener("click", function (event) {
+      var btn = event.target.closest("button[data-act]");
+      if (!btn) return;
+      var tr = btn.closest("tr");
+      if (!tr) return;
+      var select = tr.querySelector("select[data-seconds]");
+      var seconds = select ? Number(select.value) : 600;
+      memberAction(tr.dataset.openid, tr.dataset.name, btn.dataset.act, seconds);
+    });
+
+    document.querySelectorAll("button[data-manual]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var openid = ($("manual-openid").value || "").trim();
+        if (!openid) return toast("先填成员 openid");
+        var seconds = Number($("manual-seconds").value || 600);
+        memberAction(openid, "", btn.dataset.manual, seconds);
+      });
+    });
+  }
+
+  /* ---------------- 平台与模型 ---------------- */
+
+  async function loadOptions() {
+    try {
+      var data = unwrap(await callApi("options", "GET"));
+      var platforms = data.platforms || [];
+      $("platform-list").innerHTML = platforms.length
+        ? platforms.map(function (p) {
+            return '<label class="check-item"><input type="checkbox" value="' +
+              esc(p.id) + '" /> <span>' + esc(p.label) + "</span></label>";
+          }).join("")
+        : '<div class="muted">没有找到平台实例</div>';
+
+      var sel = $("llm_provider_id");
+      var current = sel.value;
+      sel.innerHTML = '<option value="">跟随会话默认</option>' +
+        (data.providers || []).map(function (p) {
+          var label = p.model ? p.model + " · " + p.id : p.id;
+          return '<option value="' + esc(p.id) + '">' + esc(label) + "</option>";
+        }).join("");
+      sel.value = current;
+    } catch (err) {
+      $("platform-list").innerHTML = '<div class="muted">读取平台列表失败</div>';
+    }
+  }
+
+  /* ---------------- 规则中心 ---------------- */
+
+  async function loadRules() {
+    try {
+      var params = { page: state.rulesPage, size: 50 };
+      var query = ($("rules-q").value || "").trim();
+      var cat = $("rules-cat").value || "all";
+      if (query) params.q = query;
+      if (cat) params.cat = cat;
+
+      var data = unwrap(await callApi("rules", "GET", params));
+      var items = data.items || [];
+
+      $("rules-total").textContent = (data.total || 0) + " 条";
+      $("rules-summary").textContent =
+        "自定义 " + (data.custom_total || 0) + " 条 · 已启用词库 " +
+        (data.enabled_total || 0) + " 条 · 共 " + ((data.stats || []).reduce(function (sum, s) {
+          return sum + s.count;
+        }, 0)) + " 条可选";
+
+      var sel = $("rules-cat");
+      var current = sel.value || "all";
+      sel.innerHTML = '<option value="all">全部已启用</option><option value="custom">仅自定义</option>' +
+        (data.stats || []).filter(function (s) { return s.enabled; }).map(function (s) {
+          return '<option value="' + esc(s.name) + '">' + esc(s.label) + "（" + s.count + "）</option>";
+        }).join("");
+      sel.value = current;
+
+      $("rules-cats").innerHTML = (data.stats || []).map(function (s) {
+        return '<label class="check-item"><input type="checkbox" data-cat="' + esc(s.name) + '"' +
+          (s.enabled ? " checked" : "") + " /> <span>" + esc(s.label) + " · " + s.count + " 条</span></label>";
+      }).join("");
+
+      var box = $("rules-table");
+      if (!items.length) {
+        box.innerHTML = '<div class="empty">没有匹配的规则词</div>';
+      } else {
+        var html = "<table><thead><tr><th>关键词</th><th>分类</th><th>来源</th><th>命中</th><th>操作</th></tr></thead><tbody>";
+        items.forEach(function (r) {
+          html += "<tr><td>" + esc(r.word) + "</td><td><span class='tag blue'>" + esc(r.category) +
+            "</span></td><td>" + (r.source === "custom" ? "自定义" : "词库") + "</td><td>" + r.hits + "</td><td>" +
+            (r.source === "custom"
+              ? "<button class='sm danger' data-word='" + esc(r.word) + "' data-rule-del='1'>删除</button>"
+              : "-") +
+            "</td></tr>";
+        });
+        box.innerHTML = html + "</tbody></table>";
+      }
+
+      var total = data.total || 0;
+      var pages = Math.max(1, Math.ceil(total / (data.size || 50)));
+      $("rules-page-info").textContent = "共 " + total + " 条 · 第 " + state.rulesPage + "/" + pages + " 页";
+      $("rules-prev").disabled = state.rulesPage <= 1;
+      $("rules-next").disabled = state.rulesPage >= pages;
+      state.rulesPages = pages;
+    } catch (err) {
+      toast("读取规则失败：" + err.message);
+    }
+  }
+
+  async function saveLexiconCategories() {
+    var selected = Array.from(document.querySelectorAll("#rules-cats input[data-cat]:checked"))
+      .map(function (box) { return box.dataset.cat; });
+    try {
+      await callApi("config", "POST", { lexicon_categories: selected });
+      toast("已保存，立即生效");
+      loadRules();
+    } catch (err) {
+      toast("保存失败：" + err.message);
+    }
+  }
+
+  async function addRule() {
+    var word = $("rule-input").value.trim();
+    if (!word) return toast("先输入关键词");
+    try {
+      await callApi("rules", "POST", { action: "add", word: word });
+      $("rule-input").value = "";
+      toast("已添加");
+      loadRules();
+    } catch (err) {
+      toast("添加失败：" + err.message);
+    }
+  }
+
+  async function seedRules() {
+    try {
+      await callApi("rules", "POST", { action: "seed" });
+      toast("已导入预置规则");
+      loadRules();
+    } catch (err) {
+      toast("导入失败：" + err.message);
+    }
+  }
+
+  async function clearRules() {
+    if (!window.confirm("确定清空所有规则词？")) return;
+    try {
+      await callApi("rules", "POST", { action: "clear" });
+      toast("已清空");
+      loadRules();
+    } catch (err) {
+      toast("清空失败：" + err.message);
+    }
+  }
+
+  /* ---------------- 刷屏监控 ---------------- */
+
+  async function loadSpam() {
+    try {
+      var data = unwrap(await callApi("spam", "GET"));
+      $("spam-status").textContent = data.enabled ? "已开启" : "未开启";
+      $("spam-window").innerHTML = data.window + "<small>秒</small>";
+      $("spam-limit").innerHTML = data.limit + "<small>条</small>";
+      $("spam-users").innerHTML = (data.rows || []).length + "<small>人</small>";
+      $("spam_enabled").checked = !!data.enabled;
+      $("spam_window").value = data.window;
+      $("spam_limit").value = data.limit;
+
+      var rows = data.rows || [];
+      var box = $("spam-table");
+      if (!rows.length) {
+        box.innerHTML = '<div class="empty">当前没有高频用户</div>';
+      } else {
+        var html = "<table><thead><tr><th>用户 openid</th><th>窗口内消息数</th><th>状态</th></tr></thead><tbody>";
+        rows.forEach(function (r) {
+          var hot = r.count > data.limit;
+          html += "<tr><td style='font-family:ui-monospace,monospace'>" + esc(String(r.user).slice(0, 16)) + "…</td><td>" +
+            r.count + "</td><td>" + (hot ? '<span class="tag bad">超阈值</span>' : '<span class="tag">正常</span>') + "</td></tr>";
+        });
+        box.innerHTML = html + "</tbody></table>";
+      }
+    } catch (err) {
+      toast("读取刷屏数据失败：" + err.message);
+    }
+  }
+
+  async function saveSpam() {
+    try {
+      await callApi("config", "POST", {
+        spam_enabled: $("spam_enabled").checked,
+        spam_window: Number($("spam_window").value || 60),
+        spam_limit: Number($("spam_limit").value || 10),
+      });
+      toast("已保存，立即生效");
+      loadSpam();
+    } catch (err) {
+      toast("保存失败：" + err.message);
+    }
+  }
+
+  /* ---------------- 设置 ---------------- */
+
+  function fillSettings(config) {
+    $("enable").checked = !!config.enable;
+    $("app_id").value = config.app_id || "";
+    $("app_secret").value = config.app_secret || "";
+    $("app_secret").type = "password";
+    $("admin_openids").value = (config.admin_openids || []).join("\n");
+    $("group_admins").value = JSON.stringify(config.group_admins || {}, null, 2);
+    $("moderation_enabled").checked = !!config.moderation_enabled;
+    $("moderation_action").value = config.moderation_action || "recall";
+    $("moderation_mute_seconds").value = config.moderation_mute_seconds || 600;
+    $("moderation_use_llm").checked = !!config.moderation_use_llm;
+    $("moderation_prompt").value = config.moderation_prompt || "";
+    $("moderation_whitelist").value = (config.moderation_whitelist || []).join("\n");
+    $("cache_messages").checked = !!config.cache_messages;
+    $("cache_size").value = config.cache_size || 30;
+    $("cache_ttl").value = config.cache_ttl || 600;
+    $("timeout").value = config.timeout || 10;
+    $("verify_ssl").checked = !!config.verify_ssl;
+
+    $("llm_provider_id").value = config.llm_provider_id || "";
+    var selected = config.platform_ids || [];
+    document.querySelectorAll("#platform-list input[type=checkbox]").forEach(function (box) {
+      box.checked = selected.indexOf(box.value) >= 0;
+    });
+
+    $("moderation_admin_exempt").checked = config.moderation_admin_exempt !== false;
+    $("moderation_notify").checked = config.moderation_notify !== false;
+    $("moderation_fail_open").checked = config.moderation_fail_open !== false;
+    $("auto_seed_rules").checked = config.auto_seed_rules !== false;
+    $("group_whitelist").value = (config.group_whitelist || []).join("\n");
+
+    $("mute_enabled").checked = config.mute_enabled !== false;
+    $("kick_enabled").checked = config.kick_enabled !== false;
+    $("recall_enabled").checked = config.recall_enabled !== false;
+    $("whole_ban_enabled").checked = config.whole_ban_enabled !== false;
+    $("member_query_enabled").checked = config.member_query_enabled !== false;
+    $("join_request_enabled").checked = config.join_request_enabled !== false;
+    $("auto_unmute").checked = config.auto_unmute !== false;
+
+    $("max_records").value = config.max_records || 500;
+    $("command_rate_limit").value = config.command_rate_limit || 0;
+    $("lexicon-summary").textContent =
+      "已启用 " + (config.lexicon_total || 0) + " 条 · 自定义 " +
+      (config.moderation_keywords_count || 0) + " 条";
+  }
+
+  async function loadSettings() {
+    try {
+      await loadOptions();
+      var data = unwrap(await callApi("status", "GET"));
+      fillSettings(data.config || {});
+    } catch (err) {
+      toast("读取设置失败：" + err.message);
+    }
+  }
+
+  function collectSettings() {
+    var groupAdmins = {};
+    var rawGroupAdmins = ($("group_admins").value || "").trim();
+    if (rawGroupAdmins) {
+      try {
+        groupAdmins = JSON.parse(rawGroupAdmins);
+      } catch (err) {
+        toast("群管理员表不是合法 JSON，先改好再保存");
+        throw new Error("invalid group_admins");
+      }
+    }
+    return {
+      group_admins: groupAdmins,
+      enable: $("enable").checked,
+      app_id: $("app_id").value.trim(),
+      app_secret: $("app_secret").value.trim(),
+      admin_openids: lines($("admin_openids").value),
+      moderation_enabled: $("moderation_enabled").checked,
+      moderation_action: $("moderation_action").value,
+      moderation_mute_seconds: Number($("moderation_mute_seconds").value || 600),
+      moderation_use_llm: $("moderation_use_llm").checked,
+      moderation_prompt: $("moderation_prompt").value.trim(),
+      moderation_whitelist: lines($("moderation_whitelist").value),
+      cache_messages: $("cache_messages").checked,
+      cache_size: Number($("cache_size").value || 30),
+      cache_ttl: Number($("cache_ttl").value || 600),
+      timeout: Number($("timeout").value || 10),
+      verify_ssl: $("verify_ssl").checked,
+      max_records: Number($("max_records").value || 500),
+      command_rate_limit: Number($("command_rate_limit").value || 0),
+      moderation_admin_exempt: $("moderation_admin_exempt").checked,
+      moderation_notify: $("moderation_notify").checked,
+      moderation_fail_open: $("moderation_fail_open").checked,
+      auto_seed_rules: $("auto_seed_rules").checked,
+      group_whitelist: lines($("group_whitelist").value),
+      mute_enabled: $("mute_enabled").checked,
+      kick_enabled: $("kick_enabled").checked,
+      recall_enabled: $("recall_enabled").checked,
+      whole_ban_enabled: $("whole_ban_enabled").checked,
+      member_query_enabled: $("member_query_enabled").checked,
+      join_request_enabled: $("join_request_enabled").checked,
+      auto_unmute: $("auto_unmute").checked,
+      llm_provider_id: $("llm_provider_id").value,
+      platform_ids: Array.from(
+        document.querySelectorAll("#platform-list input[type=checkbox]:checked")
+      ).map(function (box) { return box.value; }),
+    };
+  }
+
+  async function saveSettings() {
+    var btn = $("btn-save");
+    btn.disabled = true;
+    btn.textContent = "保存中…";
+    try {
+      var data = unwrap(await callApi("config", "POST", collectSettings()));
+      fillSettings(data.config || {});
+      toast(data.saved ? "已保存，立即生效" : "已写入内存，但配置文件保存失败");
+    } catch (err) {
+      toast("保存失败：" + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "保存设置";
+    }
+  }
+
+  async function testConnection() {
+    var box = $("test-result");
+    box.textContent = "正在验证…";
+    box.style.color = "var(--muted)";
+    try {
+      var data = unwrap(await callApi("test", "POST", { group_openid: $("test_group").value.trim() }));
+      box.textContent = data.message || "测试完成";
+      box.style.color = data.scope_ok === false ? "var(--warn)" : "var(--ok)";
+    } catch (err) {
+      box.textContent = err.message;
+      box.style.color = "var(--bad)";
+    }
+  }
+
+  /* ---------------- 事件 ---------------- */
+
+  document.querySelectorAll(".nav-item").forEach(function (el) {
+    el.addEventListener("click", function () { switchPage(el.dataset.page); });
+  });
+
+  document.querySelectorAll(".tab").forEach(function (el) {
+    el.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (t) { t.classList.remove("active"); });
+      document.querySelectorAll(".tab-page").forEach(function (p) { p.classList.remove("active"); });
+      el.classList.add("active");
+      $("tab-" + el.dataset.tab).classList.add("active");
+    });
+  });
+
+  document.addEventListener("click", async function (event) {
+    var btn = event.target.closest("button[data-act]");
+    if (!btn) return;
+    try {
+      await callApi("records/action", "POST", { id: btn.dataset.id, action: btn.dataset.act });
+      toast("已更新");
+      loadRecords();
+    } catch (err) {
+      toast("操作失败：" + err.message);
+    }
+  });
+
+  document.addEventListener("click", async function (event) {
+    var btn = event.target.closest("button[data-rule-del]");
+    if (!btn) return;
+    try {
+      await callApi("rules", "POST", { action: "delete", word: btn.dataset.word });
+      toast("已删除");
+      loadRules();
+    } catch (err) {
+      toast("删除失败：" + err.message);
+    }
+  });
+
+  document.addEventListener("click", async function (event) {
+    var btn = event.target.closest("button[data-open-members]");
+    if (!btn) return;
+    $("member-group").value = btn.dataset.group;
+    switchPage("members");
+  });
+
+  $("btn-refresh").addEventListener("click", function () { loadPage(state.page); });
+  $("btn-save").addEventListener("click", saveSettings);
+  $("btn-reload").addEventListener("click", loadSettings);
+  $("btn-test").addEventListener("click", testConnection);
+  $("btn-rule-add").addEventListener("click", addRule);
+  $("btn-rules-seed").addEventListener("click", seedRules);
+  $("btn-rules-clear").addEventListener("click", clearRules);
+  $("btn-rules-search").addEventListener("click", function () {
+    state.rulesPage = 1;
+    loadRules();
+  });
+
+  $("btn-goto-rules").addEventListener("click", function () { switchPage("rules"); });
+
+  $("rules-q").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      state.rulesPage = 1;
+      loadRules();
+    }
+  });
+
+  $("rules-prev").addEventListener("click", function () {
+    if (state.rulesPage > 1) { state.rulesPage -= 1; loadRules(); }
+  });
+
+  $("rules-next").addEventListener("click", function () {
+    if (state.rulesPage < state.rulesPages) { state.rulesPage += 1; loadRules(); }
+  });
+
+  document.addEventListener("change", function (event) {
+    if (event.target.matches && event.target.matches("#rules-cats input[data-cat]")) {
+      saveLexiconCategories();
+    }
+  });
+  $("btn-members").addEventListener("click", function () {
+    loadMembersPage();
+  });
+
+  $("btn-member-search").addEventListener("click", function () {
+    state.memberKeyword = ($("member-keyword").value || "").trim();
+    if (state.memberGroup) queryMembers(state.memberGroup, 1);
+    else toast("先查询一个群");
+  });
+
+  $("member-keyword").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") $("btn-member-search").click();
+  });
+
+  $("member-group").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") loadMembersPage();
+  });
+
+  $("members-prev").addEventListener("click", function () {
+    if (state.memberPage > 1) queryMembers(state.memberGroup, state.memberPage - 1);
+  });
+
+  $("members-next").addEventListener("click", function () {
+    queryMembers(state.memberGroup, state.memberPage + 1);
+  });
+  $("member-group").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") loadMembersPage();
+  });
+  $("btn-spam-save").addEventListener("click", saveSpam);
+  $("btn-records-refresh").addEventListener("click", function () { loadRecords(); });
+
+  $("records-kind").addEventListener("change", function () {
+    state.recordsKind = this.value;
+    state.recordsPage = 1;
+    loadRecords();
+  });
+
+  $("records-prev").addEventListener("click", function () {
+    if (state.recordsPage > 1) { state.recordsPage -= 1; loadRecords(); }
+  });
+
+  $("records-next").addEventListener("click", function () {
+    if (state.recordsPage < state.recordsPages) { state.recordsPage += 1; loadRecords(); }
+  });
+
+  $("toggle-secret").addEventListener("click", function () {
+    var input = $("app_secret");
+    var show = input.type === "password";
+    input.type = show ? "text" : "password";
+    this.textContent = show ? "隐藏" : "显示";
+  });
+
+  $("rule-input").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") addRule();
+  });
+
+  if (window.matchMedia && !window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    document.body.classList.add("light");
+  }
+
+  initMemberActions();
+  switchPage("overview");
+})();
+</script>
+</body>
+</html>
