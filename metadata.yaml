@@ -2,7 +2,7 @@ name: astrbot_plugin_qq_group_admin
 display_name: "QQ官方群管"
 desc: "适配 QQ 官方机器人的综合群管：禁言、解禁、踢人、撤回、全员禁言、禁言状态查询，内置 AI 智能审核（规则词 + 模型判定，自动撤回或禁言）和可视化设置页，保存即生效。"
 short_desc: "官方机器人专用群管：禁言、踢人、撤回、AI 审核"
-version: 1.7.1
+version: 1.7.2
 author: "1737979114"
 repo: https://github.com/1737979114/astrbot_plugin_qq_group_admin
 astrbot_version: ">=4.24.0,<5"

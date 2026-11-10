@@ -445,6 +445,48 @@ class TestGroupList(unittest.TestCase):
         self.assertEqual(reloaded.groups[gid]["member_count"], 88)
         self.assertEqual(reloaded.groups[gid]["blocked"], 2)
 
+    def test_state_path_under_plugin_data(self):
+        fake = SimpleNamespace(
+            _roster_path=lambda: Path("/tmp")
+            / "plugin_data"
+            / plugin_main.PLUGIN_NAME
+            / "roster.db"
+        )
+        path = plugin_main.QQGroupAdminPlugin._state_path(fake)
+        self.assertEqual(path.name, "state.json")
+        self.assertEqual(path.parent.name, plugin_main.PLUGIN_NAME)
+
+    def test_legacy_state_migrates_to_plugin_data(self):
+        root = Path(tempfile.mkdtemp())
+        legacy = root / "config" / f"{plugin_main.PLUGIN_NAME}_state.json"
+        legacy.parent.mkdir(parents=True)
+        gid = "C" * 32
+        legacy.write_text(
+            json.dumps(
+                {
+                    "groups": {
+                        gid: {"name": "老群", "last_seen": 1.0, "blocked": 3}
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        new = root / "plugin_data" / plugin_main.PLUGIN_NAME / "state.json"
+        fake = SimpleNamespace(
+            _state_path=lambda: new,
+            _legacy_state_path=lambda: legacy,
+            groups={},
+            daily={},
+            records=[],
+            rule_hits={},
+            _mutes={},
+        )
+        plugin_main.QQGroupAdminPlugin._load_state(fake)
+        self.assertFalse(legacy.exists())
+        self.assertTrue(new.exists())
+        self.assertEqual(fake.groups[gid]["blocked"], 3)
+        self.assertEqual(fake.groups[gid]["name"], "老群")
+
     def test_fill_group_names(self):
         plugin = make_plugin(api=FakeAPI())
         gid = "A" * 32

@@ -1418,6 +1418,11 @@ class QQGroupAdminPlugin(Star):
             return False
 
     def _state_path(self) -> Path:
+        """运行时状态放 plugin_data，跟配置分开。"""
+        return self._roster_path().with_name("state.json")
+
+    def _legacy_state_path(self) -> Path:
+        """旧版把状态写在 data/config，升级时迁移到 plugin_data。"""
         return self._config_path().with_name(f"{PLUGIN_NAME}_state.json")
 
     @staticmethod
@@ -1434,6 +1439,16 @@ class QQGroupAdminPlugin(Star):
     def _load_state(self) -> None:
         """恢复群列表、每日统计和违规记录，插件重载后不会清零。"""
         path = self._state_path()
+        if not path.exists():
+            legacy = self._legacy_state_path()
+            if legacy.exists():
+                try:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    legacy.replace(path)
+                    logger.info("[qqadmin] 状态文件已迁移到 plugin_data")
+                except Exception as exc:
+                    logger.warning(f"[qqadmin] 迁移状态文件失败，继续读旧文件：{exc}")
+                    path = legacy
         if not path.exists():
             return
         try:
